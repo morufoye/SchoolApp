@@ -2,7 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {gql, useMutation, useQuery} from "@apollo/client";
 import * as resolvers from "../service/api";
 import axios from "axios";
-import {GET_ANSWER_DETAIL, GET_DOWNLOAD_STATUS, REGISTER_JOB_APPLICANT, UPDATE_DOWNLOAD_STATUS} from "../service/api";
+import {
+    GET_ANSWER_DETAIL,
+    GET_DAILY_REPORT,
+    GET_DOWNLOAD_STATUS,
+    REGISTER_JOB_APPLICANT,
+    UPDATE_DOWNLOAD_STATUS
+} from "../service/api";
 
 let logoutTimer;
 
@@ -598,6 +604,10 @@ export const AuthContextProvider = (props) => {
         resolvers.UPDATE_STUDENT_ANSWER,
     );
 
+    const [updateStudentScore] = useMutation(
+        resolvers.UPDATE_STUDENT_SCORE,
+    );
+
     const [loadSubmittedAssignmentsForTeacher] = useMutation(
         resolvers.LOAD_SUBMITTED_ASSIGNMENTS,
     );
@@ -617,6 +627,10 @@ export const AuthContextProvider = (props) => {
 
             }
         }
+    );
+
+    const [getDailyReport] = useMutation(
+        resolvers.GET_DAILY_REPORT
     );
 
 
@@ -667,7 +681,9 @@ export const AuthContextProvider = (props) => {
       getStudentAnswerDetail,
       updateStudentAssignmentList,
       allSubmittedAssignment,
-      updateStudentAnswer
+      updateStudentAnswer,
+      updateStudentScore,
+      getDailyReport,
   };
 
   return (

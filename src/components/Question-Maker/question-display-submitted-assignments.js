@@ -9,6 +9,7 @@ export default function QuestionDisplaySubmittedAssignments({question, questionN
     const[draggedListObj, setDraggedListObj] = useState({})
     const{getAnswerDetail, getStudentAnswerDetail, currentUser} = useContext(AuthContext)
     const[viewMode, setViewMode] = useState(false);
+    const[studentMatchingResponse, setStudentMatchingResponse] = useState({})
     let textResponse = {}
     let teacher_answer = []
     let student_answer = []
@@ -28,16 +29,13 @@ export default function QuestionDisplaySubmittedAssignments({question, questionN
             setViewMode(true)
         }
 
-        const res = await getAnswerDetail({
-            variables: {"assessmentId": assessment_id},
-        })
-
-        if (res) {
-            teacher_answer = (JSON.parse(res.data.getAnswerDetail.answer_detail));
-        }
-
-
-      //  if (!isTeacher) {
+        // const res = await getAnswerDetail({
+        //     variables: {"assessmentId": assessment_id},
+        // })
+        //
+        // if (res) {
+        //     teacher_answer = (JSON.parse(res.data.getAnswerDetail.answer_detail));
+        // }
 
             const res2 = await getStudentAnswerDetail({
                 variables: {"assessmentId": assessment_id, "userId": student_id},
@@ -45,83 +43,112 @@ export default function QuestionDisplaySubmittedAssignments({question, questionN
             if (res2) {
                 student_answer = (JSON.parse(res2.data.getStudentAnswerDetail.answer_detail));
                 questionType = (res2.data.getStudentAnswerDetail.question_type)
+                setStudentMatchingResponse(student_answer)
+                score(res2.data.getStudentAnswerDetail.total_score)
             }
 
+           if ("multipleChoice" === questionType || "multipleOption" === questionType) {
+               for (let i = 0; i < student_answer.length; i++) {
+                   document.getElementById(student_answer[i]).checked = true
+               }
+           }
 
-            for (let i = 0; i < student_answer.length; i++) {
-                document.getElementById(student_answer[i]).checked = true
-            }
-      //  }
+        // if ("matching" === questionType) {
+        //     let questionLength = teacher_answer.length
+        //     let curScore = 0;
+        //     for (let i =  0; i < questionLength; i++ ) {
+        //         let skip = false;
+        //         let correctSequence = Object.values(teacher_answer[i])[0]
+        //         let studentSequence = Object.values(student_answer[i])[0]
+        //         if (correctSequence.length !== studentSequence.length) {
+        //             //  console.log(' got question  ' + [parseInt(i) + 1] + '  wrong')
+        //             continue
+        //         }
 
-        if ("multipleChoice" === questionType) {
-            if (teacher_answer.length !== 0) {
-                let x = 0;
-                if (student_answer.length !== 0) {
-                    for (let i = 0; i < student_answer.length; i++) {
-                        if (teacher_answer.indexOf(student_answer[i]) !== -1) {
-                            x++
-                        }
-                    }
-                }
-                total_score = x / teacher_answer.length;
-            }
-            score(total_score)
-        }
+        //         for (let k = 0; k < studentSequence.length; k++) {
+        //             if (correctSequence[k] !==  studentSequence[k]) {
+        //                 skip = true;
+        //                 break;
+        //             }
+        //         }
+        //         if (skip === true) {
+        //             continue
+        //         }
+        //         ++curScore;
+        //     }
+        //     total_score = curScore / questionLength;
+        //     score(total_score)
+        // }
 
-        if ("multipleOption" === questionType) {
-            let distinctQuestions = [];
-            let curScore = 0;
-            let questionLength = 0;
+        // if ("multipleChoice" === questionType) {
+        //     if (teacher_answer.length !== 0) {
+        //         let x = 0;
+        //         if (student_answer.length !== 0) {
+        //             for (let i = 0; i < student_answer.length; i++) {
+        //                 if (teacher_answer.indexOf(student_answer[i]) !== -1) {
+        //                     x++
+        //                 }
+        //             }
+        //         }
+        //         total_score = x / teacher_answer.length;
+        //     }
+        //     score(total_score)
+        // }
 
-            if (teacher_answer.length !== 0) {
-                for (let i = 0; i < teacher_answer.length; i++) {
-                    let dQ = teacher_answer[i].substring(0, teacher_answer[i].indexOf("-"))
-                    if (distinctQuestions.indexOf(dQ) === -1) {
-                        distinctQuestions.push(dQ)
-                    }
-                }
-                questionLength = distinctQuestions.length
-                let ques = 0;
-                for (let i = 0; i < questionLength; i++) {
-                    let teacherChoice = []
-                    let skip = false;
-                    for (let j = 0; j < teacher_answer.length; j++) {
-                        let answer_prefix = (distinctQuestions[i])+'-';
-                        if (teacher_answer.indexOf(answer_prefix) === -1 && teacher_answer[j].includes(answer_prefix)) {
-                            teacherChoice.push(teacher_answer[j])
-                        }
-                    }
-                    console.log(' now this is the Teacher Choice for ', distinctQuestions[i] + ' >>>>>>> '  + JSON.stringify(teacherChoice))
-                    //  select student options
-                    let studentChoice = []
-                    for (let j = 0; j < student_answer.length; j++) {
-                        let answer_prefix = (distinctQuestions[i])+'-';
-                        if (student_answer.indexOf(answer_prefix) === -1 && student_answer[j].includes(answer_prefix)) {
-                            studentChoice.push(student_answer[j])
-                        }
-                    }
-                    console.log(' now this is the Student Choice for ', distinctQuestions[i] + ' >>>>>>> '  + JSON.stringify(studentChoice))
-
-                    if (studentChoice.length !== teacherChoice.length) {
-                        continue
-                    }
-
-                    for (let k = 0; k < studentChoice.length; k++) {
-                        if (teacherChoice.indexOf(studentChoice[k]) === -1) {
-                            console.log(' something wierd happened here ' + studentChoice[k] + ' is a wrong option' )
-                            skip = true;
-                            break;
-                        }
-                    }
-                    if (skip === true) {
-                        continue
-                    }
-                    curScore++;
-                }
-            }
-            total_score = curScore / questionLength;
-            score(total_score)
-        }
+        // if ("multipleOption" === questionType) {
+        //     let distinctQuestions = [];
+        //     let curScore = 0;
+        //     let questionLength = 0;
+        //
+        //     if (teacher_answer.length !== 0) {
+        //         for (let i = 0; i < teacher_answer.length; i++) {
+        //             let dQ = teacher_answer[i].substring(0, teacher_answer[i].indexOf("-"))
+        //             if (distinctQuestions.indexOf(dQ) === -1) {
+        //                 distinctQuestions.push(dQ)
+        //             }
+        //         }
+        //         questionLength = distinctQuestions.length
+        //         let ques = 0;
+        //         for (let i = 0; i < questionLength; i++) {
+        //             let teacherChoice = []
+        //             let skip = false;
+        //             for (let j = 0; j < teacher_answer.length; j++) {
+        //                 let answer_prefix = (distinctQuestions[i])+'-';
+        //                 if (teacher_answer.indexOf(answer_prefix) === -1 && teacher_answer[j].includes(answer_prefix)) {
+        //                     teacherChoice.push(teacher_answer[j])
+        //                 }
+        //             }
+        //             console.log(' now this is the Teacher Choice for ', distinctQuestions[i] + ' >>>>>>> '  + JSON.stringify(teacherChoice))
+        //             //  select student options
+        //             let studentChoice = []
+        //             for (let j = 0; j < student_answer.length; j++) {
+        //                 let answer_prefix = (distinctQuestions[i])+'-';
+        //                 if (student_answer.indexOf(answer_prefix) === -1 && student_answer[j].includes(answer_prefix)) {
+        //                     studentChoice.push(student_answer[j])
+        //                 }
+        //             }
+        //             console.log(' now this is the Student Choice for ', distinctQuestions[i] + ' >>>>>>> '  + JSON.stringify(studentChoice))
+        //
+        //             if (studentChoice.length !== teacherChoice.length) {
+        //                 continue
+        //             }
+        //
+        //             for (let k = 0; k < studentChoice.length; k++) {
+        //                 if (teacherChoice.indexOf(studentChoice[k]) === -1) {
+        //                     console.log(' something wierd happened here ' + studentChoice[k] + ' is a wrong option' )
+        //                     skip = true;
+        //                     break;
+        //                 }
+        //             }
+        //             if (skip === true) {
+        //                 continue
+        //             }
+        //             curScore++;
+        //         }
+        //     }
+        //     total_score = curScore / questionLength;
+        //     score(total_score)
+        // }
 
     }, [])
 
@@ -133,6 +160,16 @@ export default function QuestionDisplaySubmittedAssignments({question, questionN
 
     const constructOptionIndex = (questionNumber, optionIndex) => {
         return questionNumber + '-'+optionIndex;
+    }
+
+    const loadMatchingAnswers = (questionNumber, index) => {
+        let answerIndex = questionNumber+'-'+index;
+            let ansObj =  studentMatchingResponse[questionNumber + 1];
+            let ind = questionNumber.substring(9, questionNumber.length);
+            ind = parseInt(ind) - 1
+            if (studentMatchingResponse[ind]) {
+                return Object.values(studentMatchingResponse[ind])[0][index]
+            }
     }
 
     switch (question.questionType){
@@ -237,15 +274,9 @@ export default function QuestionDisplaySubmittedAssignments({question, questionN
                         {question.options.map((option, index)=>
                             <div className="flex flex-direction-row my-1 border border-gray-400 p-1" key={index}>
                                 <span className="ml-2 w-1/2">{option}</span>
-                                <div
-                                    className="pl-2 w-1/2 bg-gray-300"
-                                    onDragOver={e=>onDragOver(e)}
-                                    onDrop={e=> onDrop(e, index)}
-                                >
-                                    <span className="ml-2">?</span>
-                                    <br/>
-                                </div>
-                            </div>)}
+                                    <input className="ml-2" value ={loadMatchingAnswers(questionNumber, index)} readOnly={true}/>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

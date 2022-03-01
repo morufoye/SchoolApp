@@ -153,7 +153,7 @@ const AllUsersList = (props) => {
                     <>
                         {isStudent &&
                         <>
-                            <span onClick={() => {handleAction(row,  'attendance Report')}}>Attendance Report</span><p></p>
+                            <span onClick={() => {handleAction(row,  'view report')}}>View Reports</span><p></p>
                             <span onClick={() => {handleAction(row, 'assign class')}}>Assign Class</span><p></p>
                             <span onClick={() => {handleAction(row,  'create report')}}>Create Report</span><p></p>
                             <span onClick={() => {handleAction(row, 'mark attendance')}}>Mark Attendance</span><p></p>

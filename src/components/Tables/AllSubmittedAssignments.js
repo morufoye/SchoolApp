@@ -93,13 +93,12 @@ const AllSubmittedAssignments = (props) => {
     const[displayQuestion, setDisplayQuestion] = useState(false);
     const[questions, setQuestions] = useState('');
     const[assessmentId, setAssessmentId] = useState('');
-    const[studentScore, setStudentScore] = useState('pending')
+    const[studentScore, setStudentScore] = useState()
     let [textAnswerList, setTextAnswerList] = useState([])
     let[textRespScore, setTextRespScore] = useState([])
     const[pass, setPass] = useState(false)
     const[questionLength, setQuestionLength] = useState(0);
     let answerList = [];
-
     let student_answer = [{}]
 
     function GlobalFilter({
@@ -131,11 +130,7 @@ const AllSubmittedAssignments = (props) => {
     }
 
     const calculateScore =(totalScore) => {
-        if ('not yet available' !== totalScore) {
-            if (totalScore * 100 > 70 ) { setPass(true)}
-            setStudentScore(totalScore * 100 + '%')
-        }
-
+        setStudentScore(totalScore )
     }
 
     const handleViewQuestion = (row) => {

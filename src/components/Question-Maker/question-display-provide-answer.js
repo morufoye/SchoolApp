@@ -12,13 +12,11 @@ export default function QuestionDisplayProvideAnswer({question, questionNumber,
     const{getAnswerDetail, getStudentAnswerDetail, currentUser} = useContext(AuthContext)
     const[viewMode, setViewMode] = useState(false);
     const[viewMatchingMode, setViewMatchingMode] = useState(false);
-    const[teachermatchingResponse, setTeacherMatchingResponse] = useState({})
+    const[teacherMatchingResponse, setTeacherMatchingResponse] = useState({})
     const[studentMatchingResponse, setStudentMatchingResponse] = useState({})
     let textResponse = {}
     let teacher_answer = []
     let student_answer = []
-    // let teacher_matching_answer = {}
-    // let student_matching_answer = {}
     let questNumb = questionNumber;
     let total_score = 'not available'
     const onDragOver =(e)=>{
@@ -27,7 +25,6 @@ export default function QuestionDisplayProvideAnswer({question, questionNumber,
     const onDragStart =(e, option)=>{
         e.dataTransfer.setData("option", option)
     }
-
      useEffect(async()=>{
          let questionType = ''
 
@@ -61,6 +58,7 @@ export default function QuestionDisplayProvideAnswer({question, questionNumber,
                  questionType = (res2.data.getStudentAnswerDetail.question_type)
                  setStudentMatchingResponse(student_answer)
                  setViewMatchingMode(true)
+                 total_score = res2.data.getStudentAnswerDetail.total_score
              }
              for (let i = 0; i < student_answer.length; i++) {
                  if (document.getElementById(student_answer[i])) {
@@ -78,11 +76,7 @@ export default function QuestionDisplayProvideAnswer({question, questionNumber,
 
                  let correctSequence = Object.values(teacher_answer[i])[0]
                  let studentSequence = Object.values(student_answer[i])[0]
-
-
-
                  if (correctSequence.length !== studentSequence.length) {
-                   //  console.log(' got question  ' + [parseInt(i) + 1] + '  wrong')
                      continue
                  }
 
@@ -98,7 +92,7 @@ export default function QuestionDisplayProvideAnswer({question, questionNumber,
                  ++curScore;
              }
              total_score = curScore / questionLength;
-             score(total_score)
+             score(total_score, currentUser.userId, assessment_id)
          }
 
 
@@ -114,7 +108,7 @@ export default function QuestionDisplayProvideAnswer({question, questionNumber,
               }
               total_score = x / teacher_answer.length;
           }
-          score(total_score)
+          score(total_score, currentUser.userId, assessment_id)
       }
 
       if ("multipleOption" === questionType) {
@@ -166,21 +160,19 @@ export default function QuestionDisplayProvideAnswer({question, questionNumber,
               }
           }
           total_score = curScore / questionLength;
-          score(total_score)
+          score(total_score, currentUser.userId, assessment_id)
       }
-
-
      }, [])
 
 
     const loadMatchingAnswers = (questionNumber, index) => {
         let answerIndex = questionNumber+'-'+index;
         if (isTeacher) {
-            let ansObj =  teachermatchingResponse[questionNumber + 1];
+            let ansObj =  teacherMatchingResponse[questionNumber + 1];
             let ind = questionNumber.substring(9, questionNumber.length);
             ind = parseInt(ind) - 1
-            if (teachermatchingResponse[ind]) {
-                return Object.values(teachermatchingResponse[ind])[0][index]
+            if (teacherMatchingResponse[ind]) {
+                return Object.values(teacherMatchingResponse[ind])[0][index]
             }
         } else {
             let ansObj =  studentMatchingResponse[questionNumber + 1];

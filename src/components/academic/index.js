@@ -141,7 +141,7 @@ export default function Academics(){
 
     const refreshList = () => {
         setDisplayStudentAsssignment(false);
-        setTimeout(()=>{setDisplayStudentAsssignment(true)}, 200)
+        setTimeout(()=>{setDisplayStudentAsssignment(true)}, 300)
     }
 
     return (

@@ -281,6 +281,7 @@ export const GET_STUDENT_ANSWER_DETAIL = gql`
         getStudentAnswerDetail(assessmentId: $assessmentId, userId: $userId) {
            answer_detail
            question_type
+           total_score
         }
     }
 `;
@@ -355,6 +356,24 @@ export const UPDATE_STUDENT_ANSWER = gql`
     }
 `;
 
+export const UPDATE_STUDENT_SCORE = gql`
+    mutation updateStudentScore($userId: String!, $assessment_id:String!,  $total_score:String!) {
+        updateStudentScore(userId: $userId, assessment_id:$assessment_id, total_score:$total_score) 
+    }
+`;
 
+//getDailyReport
+export const GET_DAILY_REPORT = gql`
+    mutation GetDailyReport($userId: String!, $report_date:String!) {
+        getDailyReport(userId: $userId, report_date:$report_date) {
+           report_date
+           comment
+           other_comment
+           adaab
+           hifz
+           murajah
+        }
+    }
+`;
 
 export default dataStore;

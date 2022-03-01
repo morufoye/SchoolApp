@@ -108,7 +108,7 @@ export function SelectColumnFilter({
 
 const StudentAssignmentList = (props) => {
     const[selectedId, setSelectedId] = useState('');
-    const {studentAssignments, currentUser, uploadStudentAnswer, updateStudentAssignmentList, getStudentAnswerDetail} = useContext(AuthContext);
+    const {studentAssignments, currentUser, uploadStudentAnswer, updateStudentAssignmentList, getStudentAnswerDetail, updateStudentScore} = useContext(AuthContext);
     const[displayQuestion, setDisplayQuestion] = useState(false);
     const[createAssigmentModal, setCreateAssigmentModal] = useState(false);
     const[assessmentOwner, setAssessmentOwner] = useState('');
@@ -229,9 +229,11 @@ const StudentAssignmentList = (props) => {
     const processScore =  (questions) => {
         let totalScore = 0;
         for (let i in questions) {
-            totalScore = totalScore + parseInt(questions[i].score)
-        }
-        setStudentScore(totalScore/questions.length * 10 + '%')
+            if (questions[i].score) {
+                totalScore = totalScore + parseInt(questions[i].score)
+            }
+         }
+         setStudentScore(totalScore/questions.length * 10 + '%')
     }
 
     const processDuration = (rawDuration) => {
@@ -424,11 +426,13 @@ const StudentAssignmentList = (props) => {
 
     }
 
-    const calculateScore =(totalScore) => {
+    const calculateScore =async(totalScore, userId, assessmentId) => {
         if ('not yet available' !== totalScore) {
-            //console.log(' >>>>>>> >>>>> >>>> >>> >> > this >>>> >> ' + totalScore)
             if (totalScore * 100 > 70 ) { setPass(true)}
             setStudentScore(totalScore * 100 + '%')
+            const res = await updateStudentScore({
+                variables : {userId: userId, assessment_id:assessmentId, total_score:totalScore * 100 + '%'}
+            })
         }
         else {
             setStudentScore(' Your grade for this assessment is still pending');

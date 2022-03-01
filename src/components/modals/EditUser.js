@@ -1,16 +1,22 @@
-import {useContext} from 'react';
+import {useContext, useState} from 'react';
 import Modal from "../UI/Modal";
 import AuthContext from "../context/auth-context";
 import Card from "../UI/Card";
 import {getCurrentDate} from "./DateUtills";
+import DailyReport from "./daily_report";
 
 const EditUser = (props) => {
-    const {updateClass, activateDeactivate, markAttendanceCommit} = useContext(AuthContext);
+    const {updateClass, activateDeactivate, markAttendanceCommit, getDailyReport} = useContext(AuthContext);
     let user= {"name" :props.name, "userId":props.userId, "presentClass" : props.currentClass};
+    let dailyReportObject = {};
+    const[showDailRepModal, setShowDailRepModal] = useState(false)
+    const[repObj, setRepObj] = useState({})
     let newClass = '';
     let userId = props.userId;
-    let userInput = {}
+    const[inputDate, setInputDate] = useState("")
+    let userInput = {};
     let dailyReport = {"userId" : props.userId, other_comment: ""};
+    const[isDaily,setIsDaily] = useState(false);
 
     const labelClass= "block text-gray-700 text-sm font-bold mb-1 mt-2"
     const inputClass= "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -18,6 +24,7 @@ const EditUser = (props) => {
     const handleChange=(e)=>{
         const field_name = e.target.name;
         const field_value = e.target.value;
+        setInputDate(e.target.value)
       if (field_name === 'class') {
           newClass = e.target.value;
           user = {...user, "class": field_value}
@@ -28,8 +35,13 @@ const EditUser = (props) => {
       if (field_name === 'dailyRepOtherComment') {
             dailyReport = {...dailyReport, "other_comment": field_value}
       }
-        console.log('daily report so far ......' + JSON.stringify(dailyReport));
+    }
 
+    const handleSelectReportType=(e)=>{
+        const report_type = e.target.value;
+        if ("Daily Report" === report_type) {
+          setIsDaily(true)
+        }
     }
 
     const handleCheckBoxChange=(e)=>{
@@ -37,7 +49,6 @@ const EditUser = (props) => {
        let value = e.target.value;
        let grades = ['poor', 'good', 'great']
         document.getElementById(value + name).checked = true;
-
        if (name === 'adaab') {
            dailyReport = {...dailyReport, 'adaab':value}
        }
@@ -75,6 +86,25 @@ const EditUser = (props) => {
         props.closeModal()
     }
 
+    const getReport = async() => {
+        console.log(" >>>>>  report date  ", JSON.stringify(inputDate))
+        const response = await getDailyReport({
+            variables: {userId:props.userId, report_date:inputDate},
+        })
+        dailyReportObject =  {
+            userId:props.userId,
+            name: props.name,
+            report_date:response.data.getDailyReport.report_date.substring(0,10),
+            comment:response.data.getDailyReport.comment,
+            other_comment:response.data.getDailyReport.other_comment,
+            adaab:response.data.getDailyReport.adaab,
+            hifz:response.data.getDailyReport.hifz,
+            murajah:response.data.getDailyReport.murajah
+                             }
+        setRepObj(dailyReportObject)
+        setShowDailRepModal(true)
+    }
+
     const  activateUser = async (event, active) => {
         event.preventDefault();
         let data = {"userId" : userId, "active": 'Y'}
@@ -98,6 +128,7 @@ const EditUser = (props) => {
         props.closeModal();
     }
     return (
+        <>
             <Modal onClose={closeModal}>
             <div className="max-w-md mx-auto">
                 <div className="w-full max-w-md">
@@ -105,6 +136,7 @@ const EditUser = (props) => {
                         <div className="mb-4 px-4">
                             <div className="max-w-7xl mx-auto py-1 align-center">
                                 <h2 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-1xl">
+                                    {  props.type === 'view report' && <span className="block text-blue-600">Reports</span>}
                                     {  props.type === 'assign class' && <span className="block text-blue-600">Assign Class</span>}
                                     {  props.type === 'activate' && <span className="block text-blue-600">Activate User</span>}
                                     {  props.type === 'deactivate' && <span className="block text-blue-600">Deactivate User</span>}
@@ -112,9 +144,9 @@ const EditUser = (props) => {
                                 </h2>
                             </div>
 
-
                             {/*{formData.map(data => data.value)}*/}
                             <div><span className="font-bold">{props.userId}</span>{'/'}<span className="font-bold">{props.name}</span>{'/'}<span className="font-bold">{props.currentClass}</span></div>
+                            <br></br>
                             {
                                 props.type === 'assign class' &&
                             <>
@@ -134,6 +166,49 @@ const EditUser = (props) => {
                                     Submit
                                 </button>
                             </>
+                            }
+
+                            {
+                                props.type === 'view report' &&
+                                <> {
+                                    !isDaily &&
+                                    <>
+                                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dob">
+                                        Select Repot Type
+                                        <span className="text-red-600">*</span>
+                                    </label>
+                                    <select  className={inputClass} value={user.class} name = "class"  onChange={handleSelectReportType}>
+                                        <option value=""></option>
+                                        <option value="Daily Report">Daily Report</option>
+                                        <option value="Weekly Report">Weekly Report</option>
+                                        <option value="Monthly Report">Monthly Report</option>
+                                    </select>
+                                    </>
+                                }
+                                    {  isDaily &&
+                                    <>
+                                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dob">
+                                            Please Enter Date
+                                            <span className="text-red-600">*</span>
+                                        </label>
+
+                                    <input
+                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        id="reportDate"
+                                        name="reportDate"
+                                        type="date"
+                                        onChange={(e)=>handleChange(e)}
+                                        value={inputDate}
+                                    />
+                                        <br></br>
+                                        <br></br>
+                                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                                type="button"
+                                                onClick={(e)=>{getReport()}}> Submit </button>
+                                    </>
+                                    }
+
+                                </>
                             }
 
                             {
@@ -270,6 +345,8 @@ const EditUser = (props) => {
                 </div>
             </div>
             </Modal>
+            {showDailRepModal && <DailyReport reportObject={repObj} onClose={() => {setShowDailRepModal(false)}}/>}
+        </>
     );
 };
 

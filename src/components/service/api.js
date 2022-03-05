@@ -376,4 +376,18 @@ export const GET_DAILY_REPORT = gql`
     }
 `;
 
+export const GET_WEEKLY_REPORT = gql`
+    mutation GetWeeklyReport($userId: String!) {
+        getWeeklyReport(userId: $userId) {
+           report_date
+           comment
+           other_comment
+           adaab
+           hifz
+           murajah
+        }
+    }
+`;
+
+
 export default dataStore;

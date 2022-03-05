@@ -633,6 +633,10 @@ export const AuthContextProvider = (props) => {
         resolvers.GET_DAILY_REPORT
     );
 
+    const [getWeeklyReport] = useMutation(
+        resolvers.GET_WEEKLY_REPORT
+    );
+
 
   const contextValue = {
     token,
@@ -684,6 +688,7 @@ export const AuthContextProvider = (props) => {
       updateStudentAnswer,
       updateStudentScore,
       getDailyReport,
+      getWeeklyReport,
   };
 
   return (

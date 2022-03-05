@@ -4,19 +4,24 @@ import AuthContext from "../context/auth-context";
 import Card from "../UI/Card";
 import {getCurrentDate} from "./DateUtills";
 import DailyReport from "./daily_report";
+import BarChart from "../charts/bar-chart";
 
 const EditUser = (props) => {
-    const {updateClass, activateDeactivate, markAttendanceCommit, getDailyReport} = useContext(AuthContext);
+    const {updateClass, activateDeactivate, markAttendanceCommit, getDailyReport, getWeeklyReport} = useContext(AuthContext);
     let user= {"name" :props.name, "userId":props.userId, "presentClass" : props.currentClass};
     let dailyReportObject = {};
+    let weeklyReportObject = {};
     const[showDailRepModal, setShowDailRepModal] = useState(false)
+    const[showWeeklyRepModal, setShowWeeklyRepModal] = useState(false)
     const[repObj, setRepObj] = useState({})
+    const[weeklyRepObj, setWeeklyRepObj] = useState({})
     let newClass = '';
     let userId = props.userId;
     const[inputDate, setInputDate] = useState("")
     let userInput = {};
     let dailyReport = {"userId" : props.userId, other_comment: ""};
     const[isDaily,setIsDaily] = useState(false);
+    const[isWeekly,setIsWeekly] = useState(false);
 
     const labelClass= "block text-gray-700 text-sm font-bold mb-1 mt-2"
     const inputClass= "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -41,6 +46,9 @@ const EditUser = (props) => {
         const report_type = e.target.value;
         if ("Daily Report" === report_type) {
           setIsDaily(true)
+        }
+        if ("Weekly Report" === report_type) {
+            setIsWeekly(true)
         }
     }
 
@@ -86,7 +94,7 @@ const EditUser = (props) => {
         props.closeModal()
     }
 
-    const getReport = async() => {
+    const getDailyReportDetails = async() => {
         console.log(" >>>>>  report date  ", JSON.stringify(inputDate))
         const response = await getDailyReport({
             variables: {userId:props.userId, report_date:inputDate},
@@ -103,6 +111,58 @@ const EditUser = (props) => {
                              }
         setRepObj(dailyReportObject)
         setShowDailRepModal(true)
+    }
+
+    const getWeeklyReportDetails = async() => {
+        let cat = [];
+        let adaab = [];
+        let murajah = [];
+        let hifz = [];
+        const res = await getWeeklyReport({
+            variables: {userId:props.userId},
+        })
+
+        if (res) {
+            for (let i = 0; i < res.data.getWeeklyReport.length; i++) {
+               cat.push(res.data.getWeeklyReport[i].report_date.substring(0, 10));
+               if (res.data.getWeeklyReport[i].adaab === "poor") {
+                   adaab.push(33)
+               }
+                if (res.data.getWeeklyReport[i].adaab === "good") {
+                    adaab.push(67)
+                }
+                if (res.data.getWeeklyReport[i].adaab === "great") {
+                    adaab.push(100)
+                }
+                if (res.data.getWeeklyReport[i].murajah === "poor") {
+                    murajah.push(33)
+                }
+                if (res.data.getWeeklyReport[i].murajah === "good") {
+                    murajah.push(67)
+                }
+                if (res.data.getWeeklyReport[i].murajah === "great") {
+                    murajah.push(100)
+                }
+                if (res.data.getWeeklyReport[i].hifz === "poor") {
+                    hifz.push(33)
+                }
+                if (res.data.getWeeklyReport[i].hifz === "good") {
+                    hifz.push(67)
+                }
+                if (res.data.getWeeklyReport[i].hifz === "great") {
+                    hifz.push(100)
+                }
+            }
+
+            weeklyReportObject = {
+                cat : cat,
+                adaab : adaab,
+                murajah : murajah,
+                hifz : hifz
+            }
+            setWeeklyRepObj(weeklyReportObject)
+            setShowWeeklyRepModal(true)
+        }
     }
 
     const  activateUser = async (event, active) => {
@@ -204,8 +264,18 @@ const EditUser = (props) => {
                                         <br></br>
                                         <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                                                 type="button"
-                                                onClick={(e)=>{getReport()}}> Submit </button>
+                                                onClick={(e)=>{getDailyReportDetails()}}> Submit </button>
                                     </>
+                                    }
+
+                                    {  isWeekly &&
+                                        <>
+                                            <br></br>
+                                            <br></br>
+                                            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                                    type="button"
+                                                    onClick={(e)=>{getWeeklyReportDetails()}}> Submit </button>
+                                        </>
                                     }
 
                                 </>
@@ -346,6 +416,7 @@ const EditUser = (props) => {
             </div>
             </Modal>
             {showDailRepModal && <DailyReport reportObject={repObj} onClose={() => {setShowDailRepModal(false)}}/>}
+            {showWeeklyRepModal && <BarChart repObject={weeklyRepObj} onClose={()=>{setShowWeeklyRepModal(false)}}/>}
         </>
     );
 };

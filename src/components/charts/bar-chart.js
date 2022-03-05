@@ -1,32 +1,50 @@
 import React, {Component, useState} from "react";
 import Chart from "react-apexcharts";
+import Modal from "../UI/Modal";
 
 const BarChart = (props) =>  {
+    let cat = props.repObject.cat;
+    let adaab = props.repObject.adaab;
+    let murajah = props.repObject.murajah;
+    let hifz = props.repObject.hifz;
+
+    console.log(" >>>>>>>  >>>>>>>   >>>>>> ", JSON.stringify(props))
+
     const[options, setOptions] = useState(
         { chart:{id: "basic-bar"},
-          xaxis: {categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998] }
+          xaxis: {categories: cat }
        })
     const[series, setSeries] = useState([
         {
-            name: "series-1",
-            data: [30, 40, 45, 50, 49, 60, 70, 91]
+            name: "adaab",
+            data: adaab
+        },
+        {
+            name: "murajah",
+            data: murajah
+        },
+        {
+            name: "hifz",
+            data: hifz
         }
     ]);
 
         return (
+            <Modal onClose={() => {props.onClose()}}>
             <div className="app">
                 <div className="row">
                     <div className="mixed-chart">
                         <Chart
                             options={options}
                             series={series}
-                            type="bar"
+                            type="line"
                             width="500"
                         />
                     </div>
                 </div>
             </div>
+            </Modal>
         );
 }
 
-export default App;
+export default BarChart;
